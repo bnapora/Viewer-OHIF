@@ -33,8 +33,7 @@ window.config = {
     prefetch: 25,
   },
   // filterQueryParam: false,
-  defaultDataSourceName: 'dicom-web-dcm4chee',
-    /* Dynamic config allows user to pass "configUrl" query string this allows to load config without recompiling application. The regex will ensure valid configuration source */
+      /* Dynamic config allows user to pass "configUrl" query string this allows to load config without recompiling application. The regex will ensure valid configuration source */
   dangerouslyUseDynamicConfig: {
     enabled: true,
     // regex will ensure valid configuration source and default is /.*/ which matches any character. To use this, setup your own regex to choose a specific source of configuration only.
@@ -44,6 +43,8 @@ window.config = {
     // regex: /(https:\/\/hospital.com(\/[0-9A-Za-z.]+)*)|(https:\/\/othersite.com(\/[0-9A-Za-z.]+)*)/
     regex: /.*/,
   },
+  defaultDataSourceName: 'dicom-web-dcm4chee',
+  // defaultDataSourceName: 'orthanc-dicom-web',
   dataSources: [
     {
       friendlyName: 'DCM4CHEE local',
@@ -72,13 +73,13 @@ window.config = {
     {
       friendlyName: 'Orthanc local',
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
-      sourceName: 'dicom-web',
+      sourceName: 'orthanc-dicom-web',
       configuration: {
         name: 'orthanc',
         requestTransferSyntaxUID: '1.2.840.10008.1.2.1',
-        wadoUriRoot: '/pacs/dicom-web',
-        qidoRoot: '/pacs/dicom-web',
-        wadoRoot: '/pacs/dicom-web',
+        wadoUriRoot: 'http://localhost/pacs/dicom-web',
+        qidoRoot: 'http://localhost/pacs/dicom-web',
+        wadoRoot: 'http://localhost/pacs/dicom-web',
         qidoSupportsIncludeField: true,
         supportsReject: true,
         imageRendering: 'wadors',

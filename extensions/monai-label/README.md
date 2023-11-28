@@ -1,7 +1,7 @@
-# monai-label 
-## Description 
-MonaiLabel Plugin for OHIFv3 
-## Author 
- 
-## License 
+# extension-monai-label
+## Description
+OHIFv3 extension for MONAI Label
+## Author
+OHIF,NVIDIA,KCL
+## License
 MIT

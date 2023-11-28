@@ -1,17 +1,28 @@
 import { hotkeys } from '@ohif/core';
-import { id } from './id';
-import { initToolGroups, toolbarButtons } from '@ohif/mode-longitudinal';
+import toolbarButtons from './toolbarButtons.js';
+import { id } from './id.js';
+import initToolGroups from './initToolGroups.js';
 
 const ohif = {
   layout: '@ohif/extension-default.layoutTemplateModule.viewerLayout',
   sopClassHandler: '@ohif/extension-default.sopClassHandlerModule.stack',
   hangingProtocol: '@ohif/extension-default.hangingProtocolModule.default',
   leftPanel: '@ohif/extension-default.panelModule.seriesList',
-  rightPanel: '@ohif/extension-default.panelModule.measure',
 };
+
+const monailabel = {
+  monaiLabel: '@ohif/extension-monai-label.panelModule.monailabel',
+}
 
 const cornerstone = {
   viewport: '@ohif/extension-cornerstone.viewportModule.cornerstone',
+};
+
+const dicomSeg = {
+  sopClassHandler:
+    '@ohif/extension-cornerstone-dicom-seg.sopClassHandlerModule.dicom-seg',
+  viewport: '@ohif/extension-cornerstone-dicom-seg.viewportModule.dicom-seg',
+  panel: '@ohif/extension-cornerstone-dicom-seg.panelModule.panelSegmentation',
 };
 
 /**
@@ -21,6 +32,9 @@ const cornerstone = {
 const extensionDependencies = {
   '@ohif/extension-default': '^3.0.0',
   '@ohif/extension-cornerstone': '^3.0.0',
+  '@ohif/extension-cornerstone-dicom-seg': '^3.0.0',
+  '@ohif/extension-test': '^0.0.1',
+  '@ohif/extension-monai-label': '^0.0.1',
 };
 
 function modeFactory({ modeConfiguration }) {
@@ -30,29 +44,40 @@ function modeFactory({ modeConfiguration }) {
      * is used to identify the mode in the viewer's state.
      */
     id,
-    routeName: 'template',
+    routeName: 'monai-label',
     /**
      * Mode name, which is displayed in the viewer's UI in the workList, for the
      * user to select the mode.
      */
-    displayName: 'Template Mode',
+    displayName: 'MONAI Label',
     /**
      * Runs when the Mode Route is mounted to the DOM. Usually used to initialize
      * Services and other resources.
      */
     onModeEnter: ({ servicesManager, extensionManager, commandsManager }) => {
-      const { measurementService, toolbarService, toolGroupService } = servicesManager.services;
+      const {
+        measurementService,
+        toolbarService,
+        toolGroupService,
+        customizationService,
+      } = servicesManager.services;
 
       measurementService.clearMeasurements();
 
       // Init Default and SR ToolGroups
       initToolGroups(extensionManager, toolGroupService, commandsManager);
 
+      // init customizations
+      customizationService.addModeCustomizations([
+        '@ohif/extension-test.customizationModule.custom-context-menu',
+      ]);
+
       let unsubscribe;
 
       const activateTool = () => {
         toolbarService.recordInteraction({
           groupId: 'WindowLevel',
+          itemId: 'WindowLevel',
           interactionType: 'tool',
           commands: [
             {
@@ -95,7 +120,6 @@ function modeFactory({ modeConfiguration }) {
       const {
         toolGroupService,
         syncGroupService,
-        toolbarService,
         segmentationService,
         cornerstoneViewportService,
       } = servicesManager.services;
@@ -114,7 +138,13 @@ function modeFactory({ modeConfiguration }) {
      * A boolean return value that indicates whether the mode is valid for the
      * modalities of the selected studies. For instance a PET/CT mode should be
      */
-    isValidMode: ({ modalities }) => true,
+    isValidMode: function ({ modalities }) {
+      const modalities_list = modalities.split('\\');
+      const isValid =
+        modalities_list.includes('CT') || modalities_list.includes('MR');
+      // Only CT or MR modalities
+      return isValid;
+    },
     /**
      * Mode Routes are used to define the mode's behavior. A list of Mode Route
      * that includes the mode's path and the layout to be used. The layout will
@@ -129,17 +159,23 @@ function modeFactory({ modeConfiguration }) {
      */
     routes: [
       {
-        path: 'template',
+        path: 'monai-label',
         layoutTemplate: ({ location, servicesManager }) => {
           return {
             id: ohif.layout,
             props: {
+              rightPanelDefaultClosed: false,
+              /* leftPanelDefaultClosed: true, */
               leftPanels: [ohif.leftPanel],
-              rightPanels: [ohif.rightPanel],
+              rightPanels: [monailabel.monaiLabel],
               viewports: [
                 {
                   namespace: cornerstone.viewport,
                   displaySetsToDisplay: [ohif.sopClassHandler],
+                },
+                {
+                  namespace: dicomSeg.viewport,
+                  displaySetsToDisplay: [dicomSeg.sopClassHandler],
                 },
               ],
             },
@@ -150,10 +186,13 @@ function modeFactory({ modeConfiguration }) {
     /** List of extensions that are used by the mode */
     extensions: extensionDependencies,
     /** HangingProtocol used by the mode */
+    hangingProtocol: 'mpr',
     // hangingProtocol: [''],
     /** SopClassHandlers used by the mode */
-    sopClassHandlers: [ohif.sopClassHandler],
-    /** hotkeys for mode */
+    sopClassHandlers: [
+      dicomSeg.sopClassHandler,
+      ohif.sopClassHandler,
+    ] /** hotkeys for mode */,
     hotkeys: [...hotkeys.defaults.hotkeyBindings],
   };
 }

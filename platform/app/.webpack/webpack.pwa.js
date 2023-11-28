@@ -69,6 +69,14 @@ module.exports = (env, argv) => {
         // Hoisted Yarn Workspace Modules
         path.resolve(__dirname, '../../../node_modules'),
         SRC_DIR,
+        path.resolve(
+          __dirname,
+          '/home/bnapora/development/Viewer-OHIF/modes/monai-label/node_modules'
+        ),
+        path.resolve(
+          __dirname,
+          '/home/bnapora/development/Viewer-OHIF/extensions/monai-label/node_modules'
+        ),
       ],
     },
     plugins: [
