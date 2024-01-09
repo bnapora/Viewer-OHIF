@@ -1,26 +1,35 @@
-// SPDX-FileCopyrightText: 2022 - 2023 Orthanc Team SRL <info@orthanc.team>
-//
-// SPDX-License-Identifier: CC0-1.0
+// const gcpClientID = '1053568465268-t2coh1p3ke4lrhu6o042squicec9toed.apps.googleusercontent.com'; // PathPreview ClientID
+// const gcpProject = 'gcp-pathology-poc1';
+// const gcpLocation = 'us-west2';
+// const gcpDataset = 'dicom-pathology';
+// const gcpStore = 'slide-dicom-store';
+// // const gcpBaseURL = 'https://healthcare.googleapis.com/v1';
 
+const gcpClientID = '1024667694253-pj3qhg8k76r3llk1du5op1iu5in4me9f.apps.googleusercontent.com'; // Insynthion ClientID
+const gcpProject = 'wsi-dicom-rnd';
+const gcpLocation = 'us-west2';
+const gcpDataset = 'DICOM-RND';
+const gcpStore = 'gs-dicomWSI-01';
 
 window.config = {
   routerBasename: '/',
-  extensions: [
-  ],
+  extensions: [],
   modes: [],
   customizationService: {
     // Shows a custom route -access via http://localhost:3000/custom
     helloPage: '@ohif/extension-default.customizationModule.helloPage',
-    dicomUploadComponent: '@ohif/extension-cornerstone.customizationModule.cornerstoneDicomUploadComponent',
+    dicomUploadComponent:
+      '@ohif/extension-cornerstone.customizationModule.cornerstoneDicomUploadComponent',
   },
   showStudyList: true,
   studyListFunctionsEnabled: true,
-  // some windows systems have issues with more than 3 web workers
   maxNumberOfWebWorkers: 3,
-  // below flag is for performance reasons, but it might not work for all servers
-  omitQuotationForMultipartRequest: true,
+  omitQuotationForMultipartRequest: true, // flag is for performance reasons, but it might not work for all servers
   // acceptHeader: 'multipart/related; type=image/jls; q=1',
   // requestTransferSyntaxUID: '1.2.840.10008.1.2.4.50',
+  // filterQueryParam: false,
+  enableGoogleCloudAdapter: false,
+  enableGoogleCloudAdapterUI: false,
   showWarningMessageForCrossOrigin: true,
   showCPUFallbackMessage: true,
   showLoadingIndicator: true,
@@ -32,19 +41,36 @@ window.config = {
     // above, the number of requests can be go a lot higher.
     prefetch: 25,
   },
-  // filterQueryParam: false,
-      /* Dynamic config allows user to pass "configUrl" query string this allows to load config without recompiling application. The regex will ensure valid configuration source */
-  dangerouslyUseDynamicConfig: {
-    enabled: true,
-    // regex will ensure valid configuration source and default is /.*/ which matches any character. To use this, setup your own regex to choose a specific source of configuration only.
-    // Example 1, to allow numbers and letters in an absolute or sub-path only.
-    // regex: /(0-9A-Za-z.]+)(\/[0-9A-Za-z.]+)*/
-    // Example 2, to restricts to either hosptial.com or othersite.com.
-    // regex: /(https:\/\/hospital.com(\/[0-9A-Za-z.]+)*)|(https:\/\/othersite.com(\/[0-9A-Za-z.]+)*)/
-    regex: /.*/,
-  },
-  defaultDataSourceName: 'dicom-web-dcm4chee',
-  // defaultDataSourceName: 'orthanc-dicom-web',
+
+  /* Dynamic config allows user to pass "configUrl" query string this allows to load config without recompiling application. The regex will ensure valid configuration source */
+  // dangerouslyUseDynamicConfig: {
+  //   enabled: true,
+  //   // regex will ensure valid configuration source and default is /.*/ which matches any character. To use this, setup your own regex to choose a specific source of configuration only.
+  //   // Example 1, to allow numbers and letters in an absolute or sub-path only.
+  //   // regex: /(0-9A-Za-z.]+)(\/[0-9A-Za-z.]+)*/
+  //   // Example 2, to restricts to either hosptial.com or othersite.com.
+  //   // regex: /(https:\/\/hospital.com(\/[0-9A-Za-z.]+)*)|(https:\/\/othersite.com(\/[0-9A-Za-z.]+)*)/
+  //   regex: /.*/,
+  // },
+  oidc: [
+    {
+      // ~ REQUIRED
+      // Authorization Server URL
+      authority: 'https://accounts.google.com',
+      client_id: gcpClientID,
+      redirect_uri: '/callback',
+      response_type: 'id_token token',
+      scope:
+        'email profile openid https://www.googleapis.com/auth/cloudplatformprojects.readonly https://www.googleapis.com/auth/cloud-healthcare', // email profile openid
+      // ~ OPTIONAL
+      post_logout_redirect_uri: '/logout-redirect.html',
+      revoke_uri: 'https://accounts.google.com/o/oauth2/revoke?token=',
+      automaticSilentRenew: true,
+      revokeAccessTokenOnSignout: true,
+    },
+  ],
+  // defaultDataSourceName: 'dicom-web-dcm4chee',
+  defaultDataSourceName: 'dicomweb-gcp',
   dataSources: [
     {
       friendlyName: 'DCM4CHEE local',
@@ -73,10 +99,10 @@ window.config = {
     {
       friendlyName: 'Orthanc local',
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
-      sourceName: 'orthanc-dicom-web',
+      sourceName: 'dicom-web-orthanc',
       configuration: {
         name: 'orthanc',
-        requestTransferSyntaxUID: '1.2.840.10008.1.2.1',
+        requestTransferSyntaxUID: '1.2.840.10008.1.2.4.50',
         wadoUriRoot: 'http://localhost/pacs/dicom-web',
         qidoRoot: 'http://localhost/pacs/dicom-web',
         wadoRoot: 'http://localhost/pacs/dicom-web',
@@ -96,6 +122,29 @@ window.config = {
       },
     },
     {
+      friendlyName: 'GCP DICOMWeb Store',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
+      sourceName: 'dicomweb-gcp',
+      configuration: {
+        name: 'GCP',
+        wadoUriRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
+        qidoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
+        wadoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
+        qidoSupportsIncludeField: true,
+        imageRendering: 'wadors',
+        thumbnailRendering: 'wadors',
+        enableStudyLazyLoad: true,
+        supportsFuzzyMatching: true,
+        supportsWildcard: false,
+        dicomUploadEnabled: true,
+        staticWado: true,
+        singlepart: 'bulkdata',
+        bulkDataURI: {
+          enabled: true,
+        },
+      },
+    },
+    {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomjson',
       sourceName: 'dicom-json',
       configuration: {
@@ -105,7 +154,7 @@ window.config = {
     },
   ],
   whiteLabeling: {
-    createLogoComponentFn: function(React) {
+    createLogoComponentFn: function (React) {
       return React.createElement(
         'a',
         {
@@ -221,63 +270,3 @@ window.config = {
     },
   ],
 };
-
-// module.exports = {
-//   prefix: '',
-//   important: false,
-//   separator: ':',
-//   theme: {
-//     screens: {
-//       sm: '640px',
-//       md: '768px',
-//       lg: '1024px',
-//       xl: '1280px',
-//     },
-//     colors: {
-//       overlay: 'rgba(0, 0, 0, 0.8)',
-//       transparent: 'transparent',
-//       black: '#000',
-//       white: '#fff',
-//       initial: 'initial',
-//       inherit: 'inherit',
-
-//       indigo: {
-//         dark: '#0b1a42',
-//       },
-//       aqua: {
-//         pale: '#7bb2ce',
-//       },
-
-//       primary: {
-//         light: '#5acce6',
-//         main: '#0944b3',
-//         dark: '#090c29',
-//         active: '#348cfd',
-//       },
-
-//       secondary: {
-//         light: '#3a3f99',
-//         main: '#2b166b',
-//         dark: '#041c4a',
-//         active: '#1f1f27',
-//       },
-
-//       common: {
-//         bright: '#e1e1e1',
-//         light: '#a19fad',
-//         main: '#fff',
-//         dark: '#726f7e',
-//         active: '#2c3074',
-//       },
-
-//       customgreen: {
-//         100: '#05D97C',
-//       },
-
-//       customblue: {
-//         100: '#c4fdff',
-//         200: '#38daff',
-//       },
-//     },
-//   },
-// };

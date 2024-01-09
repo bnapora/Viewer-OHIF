@@ -1,3 +1,15 @@
+// const gcpClientID = "1024667694253-pj3qhg8k76r3llk1du5op1iu5in4me9f.apps.googleusercontent.com"
+// const gcpProject = "wsi-dicom-rnd"
+// const gcpLocation = "us-west2"
+// const gcpDataset = "DICOM-RND"
+// const gcpStore = "gs-dicomWSI-01"
+
+const gcpClientID = '1053568465268-t2coh1p3ke4lrhu6o042squicec9toed.apps.googleusercontent.com'; // PathPreview ClientID
+const gcpProject = 'gcp-pathology-poc1';
+const gcpLocation = 'us-west2';
+const gcpDataset = 'dicom-pathology';
+const gcpStore = 'slide-dicom-store';
+
 window.config = {
   routerBasename: '/',
   customizationService: {
@@ -16,7 +28,7 @@ window.config = {
       // ~ REQUIRED
       // Authorization Server URL
       authority: 'https://accounts.google.com',
-      client_id: '723928408739-k9k9r3i44j32rhu69vlnibipmmk9i57p.apps.googleusercontent.com',
+      client_id: gcpClientID,
       redirect_uri: '/callback',
       response_type: 'id_token token',
       scope:
@@ -40,12 +52,9 @@ window.config = {
       configuration: {
         friendlyName: 'dcmjs DICOMWeb Server',
         name: 'GCP',
-        wadoUriRoot:
-          'https://healthcare.googleapis.com/v1/projects/ohif-cloud-healthcare/locations/us-east4/datasets/ohif-qa-dataset/dicomStores/ohif-qa-2/dicomWeb',
-        qidoRoot:
-          'https://healthcare.googleapis.com/v1/projects/ohif-cloud-healthcare/locations/us-east4/datasets/ohif-qa-dataset/dicomStores/ohif-qa-2/dicomWeb',
-        wadoRoot:
-          'https://healthcare.googleapis.com/v1/projects/ohif-cloud-healthcare/locations/us-east4/datasets/ohif-qa-dataset/dicomStores/ohif-qa-2/dicomWeb',
+        wadoUriRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
+        qidoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
+        wadoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
         qidoSupportsIncludeField: true,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
@@ -54,7 +63,7 @@ window.config = {
         supportsWildcard: false,
         dicomUploadEnabled: true,
         omitQuotationForMultipartRequest: true,
-        configurationAPI: 'ohif.dataSourceConfigurationAPI.google',
+        // configurationAPI: 'ohif.dataSourceConfigurationAPI.google',
       },
     },
     {
@@ -73,4 +82,22 @@ window.config = {
       },
     },
   ],
+  whiteLabeling: {
+    createLogoComponentFn: function (React) {
+      return React.createElement(
+        'a',
+        {
+          target: '_self',
+          rel: 'noopener noreferrer',
+          className: 'text-purple-600 line-through',
+          href: '/',
+        },
+        React.createElement('img', {
+          // src: './customLogo.svg',
+          src: './gestalt-logo-light.png',
+          className: 'h-10',
+        })
+      );
+    },
+  },
 };
