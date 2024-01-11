@@ -1,15 +1,15 @@
-// const gcpClientID = '1053568465268-t2coh1p3ke4lrhu6o042squicec9toed.apps.googleusercontent.com'; // PathPreview ClientID
-// const gcpProject = 'gcp-pathology-poc1';
-// const gcpLocation = 'us-west2';
-// const gcpDataset = 'dicom-pathology';
-// const gcpStore = 'slide-dicom-store';
+const gcpClientID = '1053568465268-t2coh1p3ke4lrhu6o042squicec9toed.apps.googleusercontent.com'; // PathPreview ClientID
+const gcpProject = 'gcp-pathology-poc1';
+const gcpLocation = 'us-west2';
+const gcpDataset = 'dicom-pathology';
+const gcpStore = 'slide-dicom-store';
 // // const gcpBaseURL = 'https://healthcare.googleapis.com/v1';
 
-const gcpClientID = '1024667694253-pj3qhg8k76r3llk1du5op1iu5in4me9f.apps.googleusercontent.com'; // Insynthion ClientID
-const gcpProject = 'wsi-dicom-rnd';
-const gcpLocation = 'us-west2';
-const gcpDataset = 'DICOM-RND';
-const gcpStore = 'gs-dicomWSI-01';
+// const gcpClientID = '1024667694253-pj3qhg8k76r3llk1du5op1iu5in4me9f.apps.googleusercontent.com'; // Insynthion ClientID
+// const gcpProject = 'wsi-dicom-rnd';
+// const gcpLocation = 'us-west2';
+// const gcpDataset = 'DICOM-RND';
+// const gcpStore = 'gs-dicomWSI-01';
 
 window.config = {
   routerBasename: '/',
@@ -27,9 +27,11 @@ window.config = {
   omitQuotationForMultipartRequest: true, // flag is for performance reasons, but it might not work for all servers
   // acceptHeader: 'multipart/related; type=image/jls; q=1',
   // requestTransferSyntaxUID: '1.2.840.10008.1.2.4.50',
-  // filterQueryParam: false,
-  enableGoogleCloudAdapter: false,
-  enableGoogleCloudAdapterUI: false,
+
+  // New Flags
+  enableGoogleCloudAdapter: true,
+  enableGoogleCloudAdapterUI: true,
+
   showWarningMessageForCrossOrigin: true,
   showCPUFallbackMessage: true,
   showLoadingIndicator: true,
@@ -130,6 +132,9 @@ window.config = {
         wadoUriRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
         qidoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
         wadoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}/dicomStores/${gcpStore}/dicomWeb`,
+        // wadoUriRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}`,
+        // qidoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}`,
+        // wadoRoot: `https://healthcare.googleapis.com/v1/projects/${gcpProject}/locations/${gcpLocation}/datasets/${gcpDataset}`,
         qidoSupportsIncludeField: true,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
@@ -137,11 +142,38 @@ window.config = {
         supportsFuzzyMatching: true,
         supportsWildcard: false,
         dicomUploadEnabled: true,
+        omitQuotationForMultipartRequest: true,
+        configurationAPI: 'ohif.dataSourceConfigurationAPI.google',
+        bulkDataURI: {
+          enabled: false,
+        },
+      },
+    },
+    {
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
+      sourceName: 'dicomweb-aws',
+      configuration: {
+        friendlyName: 'AWS S3 Static wado server',
+        name: 'aws',
+        wadoUriRoot: 'https://d33do7qe4w26qo.cloudfront.net/dicomweb',
+        qidoRoot: 'https://d33do7qe4w26qo.cloudfront.net/dicomweb',
+        wadoRoot: 'https://d33do7qe4w26qo.cloudfront.net/dicomweb',
+        qidoSupportsIncludeField: false,
+        imageRendering: 'wadors',
+        thumbnailRendering: 'wadors',
+        enableStudyLazyLoad: true,
+        supportsFuzzyMatching: false,
+        supportsWildcard: true,
         staticWado: true,
-        singlepart: 'bulkdata',
+        singlepart: 'bulkdata,video',
+        // whether the data source should use retrieveBulkData to grab metadata,
+        // and in case of relative path, what would it be relative to, options
+        // are in the series level or study level (some servers like series some study)
         bulkDataURI: {
           enabled: true,
+          relativeResolution: 'studies',
         },
+        omitQuotationForMultipartRequest: true,
       },
     },
     {
