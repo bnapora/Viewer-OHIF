@@ -4,9 +4,9 @@ module.exports = {
   // Note: in Tailwind 3.0, JIT will purge unused styles by default
   // but in development, it is often useful to disable this to see
   // and try out all the styles that are available.
-  // ...(process.env.NODE_ENV === 'development' && {
-  //   safelist: [{ pattern: /.*/ }],
-  // }),
+  ...(process.env.NODE_ENV === 'development' && {
+    safelist: [{ pattern: /.*/ }],
+  }),
   content: [
     './src/**/*.{jsx,js,ts,tsx, css}',
     '../../extensions/**/*.{jsx,js,ts,tsx, css}',
@@ -27,22 +27,20 @@ module.exports = {
     colors: {
       overlay: 'rgba(0, 0, 0, 0.8)',
       transparent: 'transparent',
-      black: '#000',
-      white: '#fff',
+      black: '#fff',
+      white: '#000',
       initial: 'initial',
       inherit: 'inherit',
-
-      indigo: {
-        dark: '#0b1a42',
-      },
       aqua: {
         pale: '#7bb2ce',
       },
 
       primary: {
-        light: '#5acce6',
-        main: '#0944b3',
-        dark: '#090c29',
+        light: '#3072AC',
+        // main: '#fff',
+        main: '#a19fad',
+        // dark: '#a0aec0',
+        dark: '#fff',
         active: '#348cfd',
       },
 
@@ -55,16 +53,16 @@ module.exports = {
 
       secondary: {
         light: '#3a3f99',
-        main: '#2b166b',
-        dark: '#041c4a',
-        active: '#1f1f27',
+        main: '#90cdf4',
+        dark: '#a19fad',
+        active: '#90cdf4',
       },
 
       common: {
         bright: '#e1e1e1',
         light: '#a19fad',
         main: '#fff',
-        dark: '#726f7e',
+        dark: '#3072AC',
         active: '#2c3074',
       },
 
@@ -177,6 +175,7 @@ module.exports = {
         700: '#4c51bf',
         800: '#434190',
         900: '#3c366b',
+        dark: '#718096',
       },
       purple: {
         100: '#faf5ff',
